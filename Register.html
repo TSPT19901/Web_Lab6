@@ -1,0 +1,185 @@
+f<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="globals.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=SN+Pro:ital,wght@0,200..900;1,200..900&family=Winky+Sans:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <title>Thon Sopheaktra</title>
+</head>
+<body class="bg-base-200 min-h-screen flex items-center justify-center p-4">
+    <div class="flex justify-between items-center space-x-4">
+        <!-- card1 -->
+        <div class="card w-120 h-120 max-w-lg bg-base-100 shadow-xl ">
+            <div class="card-body">
+                <div>
+                    <h1 class="card-title text-primary text-2xl mb-2 bungee-regular">Register User</h1>
+                    <div class="flex justify-center items-center pt-4">
+                        <p id="welcomeText" class="card-text text-green-500">Welcome Example</p>
+                        <button type="button" id="logoutBtn" class="btn btn-danger bg-pink-400 hover:scale-105 transition-transform duration-100">Logout</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col justify-center items-center space-y-4 pt-4">
+                <!-- Fullname -->
+                    <div >
+                        <label class="SN-pro font-bold" for="Username">Fullname</label>
+                        <div class="pt-2">
+                            <input class="h-11 w-100 rounded px-4 border-2 border-gray-400 bg-gray-100" placeholder="Input Your Fullname" type="text" name="Username" required>
+                        </div>
+                    </div>
+                <!-- Email -->
+                    <div>
+                        <label class="SN-pro font-bold" for="Email">Email</label>
+                        <div>
+                            <input class="h-11 w-100 rounded px-4 border-2 border-gray-400 bg-gray-100" placeholder="Input Your Email" type="email" name="Password" required>
+                        </div>
+                    </div>
+                    <!-- PhoneNumber -->
+                     <div>
+                        <label class="SN-pro font-bold" for="PhoneNumber">Phone</label>
+                        <div>
+                            <input id="phoneInput" class="h-11 w-100 rounded px-4 border-2 border-gray-400 bg-gray-100" placeholder="Input Your PhoneNumber" type="text" name="PhoneNumber" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-center items-center pt-6">
+                    <button type="button" id="clearBtn" class="btn btn-danger bg-pink-400 hover:scale-105 transition-transform duration-100 w-40">Clear</button>
+                    <button type="button" id="registerBtn" class="btn btn-danger bg-blue-400 hover:scale-105 transition-transform duration-100 w-60">Register</button>
+                </div>
+            </div>
+        </div>
+        <!-- card2 -->
+        <div class="card w-[700px] h-120  bg-base-100 shadow-xl">
+            <div class="card-body">
+                <div>
+                    <h1 class="card-title text-2xl mb-2 bungee-regular text-gray-700">Register User</h1>
+                    <div class="flex justify-center items-center pt-4">
+                        <table class="w-full table-fixed text-sm border border-gray-200 rounded-lg" id="userTable">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                <th class="px-3 py-2">Full Name</th>
+                                <th class="px-3 py-2">Email</th>
+                                <th class="px-3 py-2">Phone</th>
+                                <th class="px-3 py-2 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        //function to get cookies
+        function getCookie(name) {
+            let cookies = document.cookie.split(";");
+            for (let c of cookies) {
+                let [key, value] = c.trim().split("=");
+                if (key === name) return value;
+            }
+            return null;
+        }
+
+        //check login
+        let username = getCookie("username");
+
+        if (!username) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        document.getElementById("welcomeText").innerText = `Welcome ${username}!`;
+
+        //select elements
+        const fullNameInput = document.querySelector("input[placeholder='Input Your Fullname']");
+        const emailInput = document.querySelector("input[type='email']");
+        const phoneInput = document.getElementById("phoneInput");
+        const registerBtn = document.getElementById("registerBtn");
+        const clearBtn = document.getElementById("clearBtn");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const tableBody = document.getElementById("userTableBody");
+
+        //load user
+        function loadUsers() {
+            tableBody.innerHTML = "";
+            let users = JSON.parse(localStorage.getItem("users")) || [];
+
+            users.forEach((user, index) => {
+                tableBody.innerHTML += `
+                    <tr class="border-t">
+                        <td class="px-3 py-2 break-words">${user.fullName}</td>
+                        <td class="px-3 py-2 break-words">${user.email}</td>
+                        <td class="px-3 py-2 break-words">${user.phone}</td>
+                        <td class="px-3 py-2 text-right">
+                            <button onclick="deleteUser(${index})" class="text-gray-800 btn btn-danger bg-pink-400 hover:scale-105 transition-transform duration-100">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        loadUsers();
+
+        //register
+        registerBtn.addEventListener("click", function () {
+
+            let fullName = fullNameInput.value.trim();
+            let email = emailInput.value.trim();
+            let phone = phoneInput.value.trim();
+
+            if (!fullName || !email || !phone) {
+                alert("Please fill all fields!");
+                return;
+            }
+
+            let newUser = {
+                fullName: fullName,
+                email: email,
+                phone: phone
+            };
+
+            let users = JSON.parse(localStorage.getItem("users")) || [];
+            users.push(newUser);
+
+            localStorage.setItem("users", JSON.stringify(users));
+
+            loadUsers();
+
+            fullNameInput.value = "";
+            emailInput.value = "";
+            phoneInput.value = "";
+        });
+
+        //clear
+        clearBtn.addEventListener("click", function () {
+            fullNameInput.value = "";
+            emailInput.value = "";
+            phoneInput.value = "";
+        });
+
+        //logout
+        logoutBtn.addEventListener("click", function () {
+            document.cookie = "username=; path=/; max-age=0";
+            window.location.href = "login.html";
+        });
+
+    });
+
+    //delete function
+    function deleteUser(index) {
+        let users = JSON.parse(localStorage.getItem("users")) || [];
+        users.splice(index, 1);
+        localStorage.setItem("users", JSON.stringify(users));
+        location.reload();
+    }
+    </script>
+</body>
+</html>
